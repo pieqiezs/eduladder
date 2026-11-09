@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduLadder — Game Ular Tangga Edukatif</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">🪜</div><div>EduLadder <div style="font-size:.68rem;font-weight:650;color:var(--muted)">Belajar sambil bermain</div></div></div>
+    <div class="row"><span class="tag">Kelas X SMK · Fase E</span><button class="btn btn-ghost btn-small" onclick="showScreen('admin')">⚙ Panel Guru</button></div>
+  </header>
+
+  <section id="home" class="screen active">
+    <div class="hero">
+      <div><div class="eyebrow">Game ular tangga edukatif interaktif</div><h1>Naik tangga,<br>kuasai kode!</h1><p>Jelajahi algoritma, variabel, percabangan, dan perulangan lewat permainan yang seru. Lempar dadu, jawab tantangan, kumpulkan poin, dan capai garis akhir.</p><button class="btn btn-primary" onclick="showScreen('setup')">Mulai bermain <span>→</span></button></div>
+      <div class="hero-art"><div class="board-illustration" id="miniBoard"></div><div class="floating float1">🎲</div><div class="floating float2">🐍</div></div>
+    </div>
+    <div class="section-head"><div><h2>Apa yang akan kamu pelajari?</h2><p>Materi pemrograman dasar dibagi menjadi tiga level.</p></div></div>
+    <div class="grid3">
+      <div class="info-card"><div class="emoji">🌱</div><h3>Level Mudah</h3><p>Istilah pemrograman, algoritma, variabel, dan tipe data.</p><span class="pill">Kenali konsep</span></div>
+      <div class="info-card"><div class="emoji">🧩</div><h3>Level Sedang</h3><p>Membaca alur program, menentukan output, dan percabangan.</p><span class="pill">Terapkan konsep</span></div>
+      <div class="info-card"><div class="emoji">🚀</div><h3>Level Sulit</h3><p>Analisis kode, mencari bug, dan perulangan bertingkat.</p><span class="pill">Analisis kode</span></div>
+    </div>
+    <div class="footer-note">Prototipe pembelajaran · Bank soal contoh dapat diubah melalui Panel Guru.</div>
+  </section>
+
+  <section id="setup" class="screen">
+    <div class="wizard">
+      <div class="steps"><div class="step active"><b>01</b>Mode</div><div class="step"><b>02</b>Pemain</div><div class="step"><b>03</b>Level</div><div class="step"><b>04</b>Materi</div><div class="step"><b>05</b>Petunjuk</div></div>
+      <div class="wizard-title"><span class="pill">Langkah 1 dari 5</span><h1>Siap bermain?</h1><p>Pilih mode permainan terlebih dahulu.</p></div>
+      <div class="panel">
+        <h3>1. Pilih mode permainan</h3>
+        <div class="options">
+          <button class="option selected" data-mode="solo" onclick="selectMode('solo',this)"><div class="opt-emoji">🧑‍💻</div><strong>Solo vs Bot</strong><span>Main sendiri melawan pemain bot.</span></button>
+          <button class="option" data-mode="group" onclick="selectMode('group',this)"><div class="opt-emoji">👥</div><strong>Kelompok / 2–5 pemain</strong><span>Bergantian melempar dadu dan menjawab soal.</span></button>
+        </div>
+        
+        
+        <div class="notice">💡 Untuk prototipe ini, mode solo menggunakan bot sederhana. Pada mode kelompok, 2–5 pemain bermain bergantian di perangkat yang sama.</div>
+        <div class="row between" style="margin-top:20px"><button class="btn btn-ghost" onclick="showScreen('home')">← Kembali</button><button class="btn btn-primary" onclick="goPemain()">Lanjut atur pemain →</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pemain" class="screen">
+    <div class="wizard">
+      <div class="steps"><div class="step"><b>01</b>Mode</div><div class="step active"><b>02</b>Pemain</div><div class="step"><b>03</b>Level</div><div class="step"><b>04</b>Materi</div><div class="step"><b>05</b>Petunjuk</div></div>
+      <div class="wizard-title"><span class="pill">Langkah 2 dari 5</span><h1>Siapa yang bermain?</h1><p>Atur jumlah pemain dan isi nama pemain.</p></div>
+      <div class="panel">
+        <div class="field" id="countField" style="display:none"><label for="playerCount">Jumlah pemain</label><select id="playerCount" onchange="renderNames()"><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
+        <div id="groupNames"></div>
+        <div class="row between" style="margin-top:20px"><button class="btn btn-ghost" onclick="showScreen('setup')">← Kembali</button><button class="btn btn-primary" onclick="goLevel()">Lanjut pilih level →</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="level" class="screen">
+    <div class="wizard">
+      <div class="steps"><div class="step"><b>01</b>Mode</div><div class="step"><b>02</b>Pemain</div><div class="step active"><b>03</b>Level</div><div class="step"><b>04</b>Materi</div><div class="step"><b>05</b>Petunjuk</div></div>
+      <div class="wizard-title"><span class="pill">Langkah 3 dari 5</span><h1>Pilih tantanganmu</h1><p>Level menentukan jenis soal yang muncul sepanjang permainan.</p></div>
+      <div class="options">
+        <button class="option selected" data-level="mudah" onclick="selectLevel('mudah',this)"><div class="opt-emoji">🌱</div><strong>Mudah</strong><span>Istilah dasar, algoritma, variabel, tipe data.</span></button>
+        <button class="option" data-level="sedang" onclick="selectLevel('sedang',this)"><div class="opt-emoji">🧩</div><strong>Sedang</strong><span>Alur program, output, percabangan if-else.</span></button>
+        <button class="option" data-level="sulit" onclick="selectLevel('sulit',this)"><div class="opt-emoji">🔥</div><strong>Sulit</strong><span>if-else bertingkat, operator logika, mencari bug kondisi.</span></button>
+      </div>
+      <div class="panel"><div class="notice" style="margin-bottom:14px">📘 Materi: <b>Pemrograman Dasar</b> (algoritma, variabel, dan percabangan)</div><div class="row between"><button class="btn btn-ghost" onclick="showScreen('pemain')">← Kembali</button><button class="btn btn-primary" onclick="showMateri()">Lihat materi →</button></div></div>
+    </div>
+  </section>
+
+  <section id="materi" class="screen">
+    <div class="wizard">
+      <div class="steps"><div class="step"><b>01</b>Mode</div><div class="step"><b>02</b>Pemain</div><div class="step"><b>03</b>Level</div><div class="step active"><b>04</b>Materi</div><div class="step"><b>05</b>Petunjuk</div></div>
+      <div class="wizard-title"><span class="pill">Langkah 4 dari 5</span><h1>Belajar singkat dulu</h1><p>Baca ringkasan materi yang akan muncul sebagai soal.</p></div>
+      <div class="panel"><div id="materiBody"></div><div class="row between" style="margin-top:20px"><button class="btn btn-ghost" onclick="showScreen('level')">← Kembali</button><button class="btn btn-primary" onclick="showScreen('tutorial')">Lihat aturan →</button></div></div>
+    </div>
+  </section>
+
+  <section id="tutorial" class="screen">
+    <div class="wizard">
+      <div class="steps"><div class="step"><b>01</b>Mode</div><div class="step"><b>02</b>Pemain</div><div class="step"><b>03</b>Level</div><div class="step"><b>04</b>Materi</div><div class="step active"><b>05</b>Petunjuk</div></div>
+      <div class="wizard-title"><span class="pill">Langkah 5 dari 5</span><h1>Cara bermain EduLadder</h1><p>Baca aturan singkat, lalu mulai petualanganmu.</p></div><div class="notice" style="margin-bottom:14px">📝 Soal benar +10, salah −5 · 🐍⚡ Tantangan di kepala ular: benar +15 dan selamat, salah turun ular · 🎁 Bonus diputar acak · ⚔️ Duel rebutan: tekan tombolmu lebih dulu, jawab benar +10, terlambat tidak dapat poin.</div>
+      <div class="tutorial-list">
+        <div class="tutorial-item"><div class="num">1</div><div><b>Lempar dadu</b><p>Pion bergerak sesuai angka dadu pada papan 1–100.</p></div></div>
+        <div class="tutorial-item"><div class="num">2</div><div><b>Ambil kartu</b><p>Petak soal, tantangan, bonus, dan duel memicu interaksi.</p></div></div>
+        <div class="tutorial-item"><div class="num">3</div><div><b>Kumpulkan poin</b><p>Soal benar +10, tantangan benar +15, tantangan salah −5.</p></div></div>
+        <div class="tutorial-item"><div class="num">4</div><div><b>Naik atau turun</b><p>Tangga menaikkan posisi. Ular membuat pion turun ke ekornya.</p></div></div>
+      </div>
+      <div class="panel" style="margin-top:14px"><h3>Contoh kartu soal</h3><p><span class="pill">SOAL · +10 poin</span></p><p><b>Apa yang dimaksud algoritma?</b></p><p class="muted">A. Urutan langkah logis untuk menyelesaikan masalah<br>B. Nama perangkat keras<br>C. Bahasa untuk desain gambar</p><div class="notice">Setelah menjawab, sistem menunjukkan benar/salah dan pembahasan singkat agar kamu tahu alasan jawabannya.</div><div class="row between" style="margin-top:18px"><button class="btn btn-ghost" onclick="showScreen('materi')">← Kembali</button><button class="btn btn-primary" onclick="startGame()">Mulai permainan 🎲</button></div></div>
+    </div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="game-header"><div><span class="pill" id="gameLevelPill">LEVEL MUDAH</span><h1 style="margin-top:8px">Papan EduLadder</h1><div class="muted" id="turnLabel">Giliran Pemain 1</div></div><div class="row"><button class="btn btn-ghost btn-small" onclick="showScreen('tutorial')">Aturan</button><button class="btn btn-ghost btn-small" onclick="confirmExit()">Keluar</button></div></div>
+    <div class="game-layout">
+      <div class="game-main">
+        <div class="board-wrap"><div class="board" id="board"></div></div>
+        <div class="legend"><span>📝 Soal</span><span>🐍⚡ Tantangan (kepala ular)</span><span>🎁 Bonus</span><span>⚔️ Duel rebutan</span><span>🪜 Tangga</span><span>🐍 Ular</span></div>
+      </div>
+      <aside class="sidebar">
+        <div class="side-card"><h3>🎲 Giliranmu</h3><div class="dice-row"><div class="dice" id="diceFace">⚄</div><div><b id="activeName">Pemain 1</b><div class="muted" style="font-size:.8rem" id="rollHint">Tekan tombol untuk jalan.</div></div></div><button class="btn btn-primary" id="rollBtn" style="width:100%;margin-top:13px" onclick="rollDice()">Lempar dadu</button></div>
+        <div class="side-card"><h3>🏆 Skor pemain</h3><div id="scorePanel"></div></div>
+        <div class="side-card"><h3>📍 Progres finish</h3><div id="progressPanel"></div><div class="muted" style="font-size:.8rem">Target: petak 100</div></div>
+        <div class="side-card"><h3>🧭 Aktivitas terakhir</h3><div class="muted" id="activity" aria-live="polite">Permainan siap dimulai. Semangat!</div></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="result" class="screen">
+    <div class="panel result-hero"><div class="big">🏁</div><span class="pill">Permainan selesai</span><h1 id="winnerTitle">Hebat!</h1><p class="muted" id="resultText">Kamu sudah menyelesaikan permainan.</p><div class="result-grid" id="resultStats"></div><div class="row" style="justify-content:center;margin-top:20px"><button class="btn btn-primary" onclick="startGame()">Main lagi</button><button class="btn btn-ghost" onclick="showScreen('home')">Beranda</button></div></div>
+  </section>
+
+  <section id="admin" class="screen">
+    <div class="row between" style="margin-bottom:16px"><div><span class="pill">MODE PENGELOLA</span><h1 style="margin:8px 0 4px">Panel Guru</h1><p class="muted" style="margin:0">Tambah, edit, hapus, dan ekspor bank soal prototipe.</p></div><button class="btn btn-ghost" onclick="showScreen('home')">← Beranda</button></div>
+    <div class="notice" style="margin-bottom:16px">Catatan prototipe: bank soal tersimpan selama halaman ini masih terbuka. Jika halaman dimuat ulang, perubahan dapat hilang, jadi gunakan Ekspor JSON sebagai cadangan. Belum ada akun guru, sinkronisasi online, atau penyimpanan lintas perangkat.</div>
+    <div class="panel" style="margin-bottom:16px"><h2 id="formTitle" style="margin-top:0">Tambah soal</h2><div class="field"><label>Pertanyaan</label><textarea id="qText" placeholder="Contoh: Apa fungsi variabel dalam program?"></textarea></div><div class="grid3"><div class="field"><label>Level</label><select id="qLevel"><option value="mudah">Mudah</option><option value="sedang">Sedang</option><option value="sulit">Sulit</option></select></div><div class="field"><label>Jenis kartu</label><select id="qType"><option value="question">Soal biasa (+10)</option><option value="challenge">Tantangan (+15 / −5)</option></select></div><div class="field"><label>Format</label><select id="qFormat" onchange="toggleQuestionFormat()"><option value="mcq">Pilihan ganda</option><option value="short">Isian singkat</option></select></div></div>
+    <div id="mcqFields"><div class="grid3"><div class="field"><label>Opsi A</label><input id="optA" placeholder="Pilihan A"></div><div class="field"><label>Opsi B</label><input id="optB" placeholder="Pilihan B"></div><div class="field"><label>Opsi C</label><input id="optC" placeholder="Pilihan C"></div></div><div class="field"><label>Jawaban benar</label><select id="qCorrect"><option value="0">A</option><option value="1">B</option><option value="2">C</option></select></div></div>
+    <div id="shortFields" class="hidden"><div class="field"><label>Jawaban singkat</label><input id="shortAnswer" placeholder="Jawaban yang diterima"></div></div>
+    <div class="field"><label>Pembahasan / feedback</label><textarea id="qExplain" placeholder="Jelaskan alasan jawaban benar secara singkat."></textarea></div>
+    <div class="row"><button class="btn btn-primary" onclick="saveQuestion()">Simpan soal</button><button class="btn btn-ghost" onclick="resetQuestionForm()">Bersihkan</button><button class="btn btn-ghost" onclick="exportQuestions()">Ekspor bank soal JSON</button><label class="btn btn-ghost" for="importFile">Impor JSON</label><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importQuestions(event)"></div></div>
+    <div class="panel"><div class="row between"><h2 style="margin:0">Bank soal (<span id="questionCount">0</span>)</h2><select id="filterLevel" style="max-width:170px;padding:9px;border-radius:10px;border:1px solid var(--line)" onchange="renderAdminQuestions()"><option value="all">Semua level</option><option value="mudah">Mudah</option><option value="sedang">Sedang</option><option value="sulit">Sulit</option></select></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Soal</th><th>Level / jenis</th><th>Jawaban</th><th>Aksi</th></tr></thead><tbody id="questionRows"></tbody></table></div></div>
+  </section>
+  <div class="footer-note">EduLadder · Prototipe front-end untuk pengembangan media pembelajaran</div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal" id="modalContent"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
