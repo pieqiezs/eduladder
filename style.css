@@ -9,7 +9,3 @@
 .cell .event-label{font-size:.48rem}
 .duel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:700px){.game-layout{grid-template-columns:1fr}.duel-grid{grid-template-columns:1fr}}
-
-.buzz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.buzz{padding:14px 10px;border-radius:13px;font-weight:800;line-height:1.3}.buzz:disabled{opacity:.4}
-
-.modal .question-text{white-space:pre-wrap}
