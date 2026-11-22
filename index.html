@@ -2,15 +2,18 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#172554">
+<meta name="mobile-web-app-capable" content="yes">
 <title>EduLadder — Game Ular Tangga Edukatif</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="fx.css">
 </head>
 <body>
 <div class="app">
   <header class="topbar">
     <div class="brand"><div class="logo">🪜</div><div>EduLadder <div style="font-size:.68rem;font-weight:650;color:var(--muted)">Belajar sambil bermain</div></div></div>
-    <div class="row"><span class="tag">Kelas X SMK · Fase E</span><button class="btn btn-ghost btn-small" onclick="showScreen('admin')">⚙ Panel Guru</button></div>
+    <div class="row"><span class="tag">Kelas X SMK · Fase E</span><button class="btn btn-ghost btn-small" id="muteBtn" onclick="toggleSound()" aria-label="Suara">🔊</button><button class="btn btn-ghost btn-small" onclick="showScreen('admin')">⚙ Panel Guru</button></div>
   </header>
 
   <section id="home" class="screen active">
@@ -32,15 +35,12 @@
       <div class="steps"><div class="step active"><b>01</b>Mode</div><div class="step"><b>02</b>Pemain</div><div class="step"><b>03</b>Level</div><div class="step"><b>04</b>Materi</div><div class="step"><b>05</b>Petunjuk</div></div>
       <div class="wizard-title"><span class="pill">Langkah 1 dari 5</span><h1>Siap bermain?</h1><p>Pilih mode permainan terlebih dahulu.</p></div>
       <div class="panel">
-        <h3>1. Pilih mode permainan</h3>
-        <div class="options">
+        <h3>Pilih mode permainan</h3>
+        <div class="options" style="grid-template-columns:repeat(2,1fr)">
           <button class="option selected" data-mode="solo" onclick="selectMode('solo',this)"><div class="opt-emoji">🧑‍💻</div><strong>Solo vs Bot</strong><span>Main sendiri melawan pemain bot.</span></button>
           <button class="option" data-mode="group" onclick="selectMode('group',this)"><div class="opt-emoji">👥</div><strong>Kelompok / 2–5 pemain</strong><span>Bergantian melempar dadu dan menjawab soal.</span></button>
         </div>
-        
-        
-        <div class="notice">💡 Untuk prototipe ini, mode solo menggunakan bot sederhana. Pada mode kelompok, 2–5 pemain bermain bergantian di perangkat yang sama.</div>
-        <div class="row between" style="margin-top:20px"><button class="btn btn-ghost" onclick="showScreen('home')">← Kembali</button><button class="btn btn-primary" onclick="goPemain()">Lanjut atur pemain →</button></div>
+        <div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn btn-primary" onclick="showScreen('pemain')">Atur pemain →</button></div>
       </div>
     </div>
   </section>
@@ -48,11 +48,12 @@
   <section id="pemain" class="screen">
     <div class="wizard">
       <div class="steps"><div class="step"><b>01</b>Mode</div><div class="step active"><b>02</b>Pemain</div><div class="step"><b>03</b>Level</div><div class="step"><b>04</b>Materi</div><div class="step"><b>05</b>Petunjuk</div></div>
-      <div class="wizard-title"><span class="pill">Langkah 2 dari 5</span><h1>Siapa yang bermain?</h1><p>Atur jumlah pemain dan isi nama pemain.</p></div>
+      <div class="wizard-title"><span class="pill">Langkah 2 dari 5</span><h1>Siapa yang bermain?</h1><p>Isi nama pemain sebelum memilih level.</p></div>
       <div class="panel">
-        <div class="field" id="countField" style="display:none"><label for="playerCount">Jumlah pemain</label><select id="playerCount" onchange="renderNames()"><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
-        <div id="groupNames"></div>
-        <div class="row between" style="margin-top:20px"><button class="btn btn-ghost" onclick="showScreen('setup')">← Kembali</button><button class="btn btn-primary" onclick="goLevel()">Lanjut pilih level →</button></div>
+        <div id="countField" style="display:none"><div class="field"><label for="playerCount">Jumlah pemain</label><select id="playerCount" onchange="renderNames()"><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div></div>
+        <div class="field"><label for="player1">Nama pemain 1</label><input id="player1" value="Pemain 1" maxlength="22"></div>
+        <div id="player2Field" style="display:none"><div id="groupNames"></div></div>
+        <div class="row between" style="margin-top:16px"><button class="btn btn-ghost" onclick="showScreen('setup')">← Kembali</button><button class="btn btn-primary" onclick="goLevel()">Pilih level →</button></div>
       </div>
     </div>
   </section>
@@ -81,7 +82,7 @@
   <section id="tutorial" class="screen">
     <div class="wizard">
       <div class="steps"><div class="step"><b>01</b>Mode</div><div class="step"><b>02</b>Pemain</div><div class="step"><b>03</b>Level</div><div class="step"><b>04</b>Materi</div><div class="step active"><b>05</b>Petunjuk</div></div>
-      <div class="wizard-title"><span class="pill">Langkah 5 dari 5</span><h1>Cara bermain EduLadder</h1><p>Baca aturan singkat, lalu mulai petualanganmu.</p></div><div class="notice" style="margin-bottom:14px">📝 Soal benar +10, salah −5 · 🐍⚡ Tantangan di kepala ular: benar +15 dan selamat, salah turun ular · 🎁 Bonus diputar acak · ⚔️ Duel rebutan: tekan tombolmu lebih dulu, jawab benar +10, terlambat tidak dapat poin.</div>
+      <div class="wizard-title"><span class="pill">Langkah 5 dari 5</span><h1>Cara bermain EduLadder</h1><p>Baca aturan singkat, lalu mulai petualanganmu.</p></div><div class="notice" style="margin-bottom:14px">📝 Soal benar +10 · 🐍⚡ Tantangan di kepala ular: benar +15 dan selamat, salah turun ular · 🎁 Bonus diputar acak · ⚔️ Duel: tercepat menjawab benar +10, terlambat tidak dapat poin.</div>
       <div class="tutorial-list">
         <div class="tutorial-item"><div class="num">1</div><div><b>Lempar dadu</b><p>Pion bergerak sesuai angka dadu pada papan 1–100.</p></div></div>
         <div class="tutorial-item"><div class="num">2</div><div><b>Ambil kartu</b><p>Petak soal, tantangan, bonus, dan duel memicu interaksi.</p></div></div>
@@ -97,7 +98,7 @@
     <div class="game-layout">
       <div class="game-main">
         <div class="board-wrap"><div class="board" id="board"></div></div>
-        <div class="legend"><span>📝 Soal</span><span>🐍⚡ Tantangan (kepala ular)</span><span>🎁 Bonus</span><span>⚔️ Duel rebutan</span><span>🪜 Tangga</span><span>🐍 Ular</span></div>
+        <div class="legend"><span>📝 Soal</span><span>🐍⚡ Tantangan (kepala ular)</span><span>🎁 Bonus</span><span>⚔️ Duel</span><span>🪜 Tangga</span><span>🐍 Ular</span></div>
       </div>
       <aside class="sidebar">
         <div class="side-card"><h3>🎲 Giliranmu</h3><div class="dice-row"><div class="dice" id="diceFace">⚄</div><div><b id="activeName">Pemain 1</b><div class="muted" style="font-size:.8rem" id="rollHint">Tekan tombol untuk jalan.</div></div></div><button class="btn btn-primary" id="rollBtn" style="width:100%;margin-top:13px" onclick="rollDice()">Lempar dadu</button></div>
@@ -116,7 +117,7 @@
     <div class="row between" style="margin-bottom:16px"><div><span class="pill">MODE PENGELOLA</span><h1 style="margin:8px 0 4px">Panel Guru</h1><p class="muted" style="margin:0">Tambah, edit, hapus, dan ekspor bank soal prototipe.</p></div><button class="btn btn-ghost" onclick="showScreen('home')">← Beranda</button></div>
     <div class="notice" style="margin-bottom:16px">Catatan prototipe: bank soal tersimpan selama halaman ini masih terbuka. Jika halaman dimuat ulang, perubahan dapat hilang, jadi gunakan Ekspor JSON sebagai cadangan. Belum ada akun guru, sinkronisasi online, atau penyimpanan lintas perangkat.</div>
     <div class="panel" style="margin-bottom:16px"><h2 id="formTitle" style="margin-top:0">Tambah soal</h2><div class="field"><label>Pertanyaan</label><textarea id="qText" placeholder="Contoh: Apa fungsi variabel dalam program?"></textarea></div><div class="grid3"><div class="field"><label>Level</label><select id="qLevel"><option value="mudah">Mudah</option><option value="sedang">Sedang</option><option value="sulit">Sulit</option></select></div><div class="field"><label>Jenis kartu</label><select id="qType"><option value="question">Soal biasa (+10)</option><option value="challenge">Tantangan (+15 / −5)</option></select></div><div class="field"><label>Format</label><select id="qFormat" onchange="toggleQuestionFormat()"><option value="mcq">Pilihan ganda</option><option value="short">Isian singkat</option></select></div></div>
-    <div id="mcqFields"><div class="grid3"><div class="field"><label>Opsi A</label><input id="optA" placeholder="Pilihan A"></div><div class="field"><label>Opsi B</label><input id="optB" placeholder="Pilihan B"></div><div class="field"><label>Opsi C</label><input id="optC" placeholder="Pilihan C"></div></div><div class="field"><label>Jawaban benar</label><select id="qCorrect"><option value="0">A</option><option value="1">B</option><option value="2">C</option></select></div></div>
+    <div id="mcqFields"><div class="grid3"><div class="field"><label>Opsi A</label><input id="optA" placeholder="Pilihan A"></div><div class="field"><label>Opsi B</label><input id="optB" placeholder="Pilihan B"></div><div class="field"><label>Opsi C</label><input id="optC" placeholder="Pilihan C"></div></div><div class="field"><label>Opsi D (boleh kosong)</label><input id="optD" placeholder="Pilihan D"></div><div class="field"><label>Jawaban benar</label><select id="qCorrect"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div></div>
     <div id="shortFields" class="hidden"><div class="field"><label>Jawaban singkat</label><input id="shortAnswer" placeholder="Jawaban yang diterima"></div></div>
     <div class="field"><label>Pembahasan / feedback</label><textarea id="qExplain" placeholder="Jelaskan alasan jawaban benar secara singkat."></textarea></div>
     <div class="row"><button class="btn btn-primary" onclick="saveQuestion()">Simpan soal</button><button class="btn btn-ghost" onclick="resetQuestionForm()">Bersihkan</button><button class="btn btn-ghost" onclick="exportQuestions()">Ekspor bank soal JSON</button><label class="btn btn-ghost" for="importFile">Impor JSON</label><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importQuestions(event)"></div></div>
@@ -129,5 +130,6 @@
 <div class="toast" id="toast"></div>
 
 <script src="script.js"></script>
+<script src="fx.js"></script>
 </body>
 </html>
