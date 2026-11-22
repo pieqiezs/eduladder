@@ -719,42 +719,74 @@ const initialQuestions = [
   "correct": 1,
   "answer": "edok",
   "explain": "Penggabungan `h + hasil` membalikkan urutan karakter pada kata \"kode\", sehingga menghasilkan \"edok\"."
+ },
+ {
+  "id": 100,
+  "level": "mudah",
+  "type": "challenge",
+  "format": "mcq",
+  "text": "Tantangan cepat: tipe data yang cocok untuk menyimpan bilangan bulat adalah ...",
+  "options": [
+   "int",
+   "string",
+   "boolean"
+  ],
+  "correct": 0,
+  "answer": "int",
+  "explain": "Dalam banyak bahasa pemrograman, int digunakan untuk menyimpan bilangan bulat."
+ },
+ {
+  "id": 101,
+  "level": "sedang",
+  "type": "challenge",
+  "format": "mcq",
+  "text": "Jika nilai = 45 dan syarat if (nilai >= 75), apakah kondisi bernilai benar?",
+  "options": [
+   "Benar",
+   "Salah",
+   "Tidak bisa ditentukan"
+  ],
+  "correct": 1,
+  "answer": "Salah",
+  "explain": "45 tidak lebih besar atau sama dengan 75, jadi kondisi bernilai false."
+ },
+ {
+  "id": 102,
+  "level": "sulit",
+  "type": "challenge",
+  "format": "mcq",
+  "text": "Bug hunt: variabel i dimulai dari 1, kondisi i <= 5, tetapi i tidak pernah bertambah. Apa risikonya?",
+  "options": [
+   "Loop tidak berhenti",
+   "Loop berjalan tepat sekali",
+   "Tidak ada risiko"
+  ],
+  "correct": 0,
+  "answer": "Loop tidak berhenti",
+  "explain": "Variabel kontrol perlu diperbarui agar kondisi perulangan akhirnya menjadi salah."
  }
 ];
 let questions = [...initialQuestions];
 let editingId = null, mode = "solo", level = "mudah", players = [], current = 0, turn = 0, diceValue = 1, gameOver = false, lastRoll = false, questionCounter = 0, usedQuestionIds = new Set(), lastQuestion = null;
 const PCOL=['#3157d5','#ff766e','#16a36a','#e69a14','#8664db'];
 // Tangga pendek (naik 11-14 petak); kepala ular = petak tantangan
-const cellRC=n=>{const r=Math.floor((n-1)/10),i=(n-1)%10;return[r,r%2?9-i:i];};
-const cellN=(r,c)=>r%2?r*10+10-c:r*10+c+1;
-const above=n=>{const[r,c]=cellRC(n);return cellN(r+1,c);};
-const below=n=>{const[r,c]=cellRC(n);return cellN(r-1,c);};
-const ladders={},snakes={};
-[3,8,22,31,47,53,72,77].forEach(n=>ladders[n]=above(n));
-[26,38,63,74,88,95,99].forEach(n=>snakes[n]=below(n));
-const reserved=new Set([...Object.keys(ladders),...Object.values(ladders),...Object.keys(snakes),...Object.values(snakes)].map(Number));
+const ladders={3:17,8:19,22:35,29:41,47:60,53:67,72:86,77:91};
+const snakes={26:11,38:21,49:32,63:45,74:57,88:70,95:76,99:80};
 const eventCells={};
-[[5,12,14,25,30,34,40,43,51,56,59,66,71,75,90,93],[7,20,33,42,52,64,76,92],[10,36,46,61,81]].forEach((l,i)=>l.forEach(n=>{if(!reserved.has(n))eventCells[n]=['question','bonus','duel'][i];}));
+[[5,12,14,18,25,30,34,40,43,51,56,59,66,71,75,82,90,93],[7,15,23,33,42,52,64,73,84,92],[13,37,50,68,85]].forEach((a,i)=>a.forEach(n=>eventCells[n]=['question','bonus','duel'][i]));
 const diceFaces=["⚀","⚁","⚂","⚃","⚄","⚅"];
 let extraTurn=false,lastCorrect=false,DU=null;
-const MATERI={p:[['Algoritma','Urutan langkah logis untuk menyelesaikan masalah, misalnya langkah memasak mi instan.'],['Flowchart','Diagram alur: oval = mulai/selesai, persegi = proses, belah ketupat = keputusan.'],['Variabel','Wadah penyimpan nilai, misalnya totalNilai = 80. Beri nama yang jelas dan bermakna.'],['Tipe data','int untuk bilangan bulat, string untuk teks, boolean untuk benar/salah.'],['Kondisi','Perbandingan yang menghasilkan benar atau salah, misalnya nilai >= 75.'],['Percabangan if-else','Blok if berjalan jika kondisi benar, selain itu blok else. Bisa bertingkat dengan else if.']],f:{mudah:'algoritma, flowchart, variabel, dan tipe data',sedang:'menelusuri alur, nilai variabel, dan if-else dasar',sulit:'if-else bertingkat, operator logika, dan mencari bug kondisi'}};
+const MATERI={pill:'Pemrograman Dasar',t:'Algoritma, variabel, dan percabangan',fokus:{mudah:'algoritma, flowchart, variabel, dan tipe data',sedang:'alur program, output, dan percabangan if-else',sulit:'if-else bertingkat, operator logika, dan mencari bug kondisi'},p:[['Algoritma','Urutan langkah logis untuk menyelesaikan masalah, misalnya langkah memasak mi instan.'],['Flowchart','Diagram alur: oval = mulai/selesai, persegi = proses, belah ketupat = keputusan.'],['Variabel','Wadah penyimpan nilai, misalnya totalNilai = 80. Beri nama yang jelas dan bermakna.'],['Tipe data','int untuk bilangan bulat, string untuk teks, boolean untuk benar/salah.'],['Kondisi','Perbandingan yang menghasilkan benar atau salah, misalnya nilai >= 75.'],['Percabangan if-else','Blok if berjalan jika kondisi benar, selain itu blok else. Bisa bertingkat dengan else if.']]};
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});if(id==='admin')renderAdminQuestions();}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
-function renderNames(){
-  const n=mode==='group'?+document.getElementById('playerCount').value:1,old={};
-  document.querySelectorAll('[id^=gname]').forEach(e=>old[e.id]=e.value);
-  let h='';for(let i=1;i<=n;i++)h+=`<div class="field"><label for="gname${i}">Nama pemain ${i}</label><input id="gname${i}" maxlength="22" value="${escapeHtml(old['gname'+i]||'Pemain '+i)}"></div>`;
-  document.getElementById('groupNames').innerHTML=h;
-}
-function selectMode(m,el){mode=m;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');}
-function goPemain(){document.getElementById('countField').style.display=mode==='group'?'block':'none';renderNames();showScreen('pemain');}
+function renderNames(){const n=+document.getElementById('playerCount').value;let h='';for(let i=2;i<=n;i++)h+=`<div class="field"><label for="gname${i}">Nama pemain ${i}</label><input id="gname${i}" value="Pemain ${i}" maxlength="22"></div>`;document.getElementById('groupNames').innerHTML=h;}
+function selectMode(m,el){mode=m;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');document.getElementById('player2Field').style.display=m==='group'?'block':'none';document.getElementById('countField').style.display=m==='group'?'block':'none';if(m==='group')renderNames();}
 function selectLevel(l,el){level=l;document.querySelectorAll('[data-level]').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');}
-function goLevel(){if(!document.getElementById('gname1').value.trim()){toast('Isi nama pemain 1 terlebih dahulu.');return;}showScreen('level');}
-function showMateri(){document.getElementById('materiBody').innerHTML=`<span class="pill">PEMROGRAMAN DASAR</span><h2 style="margin:10px 0">Algoritma, variabel, dan percabangan</h2><div class="notice" style="margin-bottom:14px">Fokus soal level ${level}: ${MATERI.f[level]}.</div><div class="tutorial-list">${MATERI.p.map((x,i)=>`<div class="tutorial-item"><div class="num">${i+1}</div><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>`;showScreen('materi');}
+function goLevel(){if(!document.getElementById('player1').value.trim()){toast('Isi nama pemain terlebih dahulu.');return;}showScreen('level');}
+function showMateri(){document.getElementById('materiBody').innerHTML=`<span class="pill">${MATERI.pill.toUpperCase()}</span><h2 style="margin:10px 0">${MATERI.t}</h2><div class="notice" style="margin:0 0 14px;padding:10px 13px;font-size:.82rem">Fokus soal level ${level}: ${MATERI.fokus[level]}.</div><div class="tutorial-list">${MATERI.p.map((x,i)=>`<div class="tutorial-item"><div class="num">${i+1}</div><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>`;showScreen('materi');}
 function startGame(){
-  const n=mode==='group'?+document.getElementById('playerCount').value:1,names=[];
-  for(let i=1;i<=n;i++)names.push((document.getElementById('gname'+i).value||'').trim()||'Pemain '+i);
-  if(mode==='solo')names.push('Bot Edu');
+  const names=[document.getElementById('player1').value.trim()||'Pemain 1'];
+  if(mode==='solo')names.push('Bot Edu');else{const n=+document.getElementById('playerCount').value;for(let i=2;i<=n;i++)names.push(document.getElementById('gname'+i).value.trim()||'Pemain '+i);}
   players=names.map((name,i)=>({name,pos:1,score:0,correct:0,answered:0,bot:mode==='solo'&&i===1}));
   current=0;turn=0;diceValue=1;gameOver=false;lastRoll=false;extraTurn=false;questionCounter=0;usedQuestionIds=new Set();lastQuestion=null;
   document.getElementById('gameLevelPill').textContent='LEVEL '+level.toUpperCase();
@@ -779,7 +811,7 @@ function renderBoard(){
   }
 }
 function renderStats(){
-  document.getElementById('scorePanel').innerHTML=players.map((p,i)=>`<div class="score-line"><span><span style="color:${PCOL[i]}">●</span> ${escapeHtml(p.name)}</span><b style="color:${p.score<0?'#d33b36':'inherit'}">${p.score<0?'−'+Math.abs(p.score):p.score} poin</b></div>`).join('');
+  document.getElementById('scorePanel').innerHTML=players.map((p,i)=>`<div class="score-line"><span><span style="color:${PCOL[i]}">●</span> ${escapeHtml(p.name)}</span><b>${p.score} poin</b></div>`).join('');
   document.getElementById('progressPanel').innerHTML=players.map(p=>`<div style="margin:10px 0"><div class="row between" style="font-size:.82rem"><b>${escapeHtml(p.name)}</b><span>Petak ${p.pos}/100</span></div><div class="progressbar"><div style="width:${p.pos}%"></div></div></div>`).join('');
 }
 function updateTurn(){
@@ -801,7 +833,7 @@ function doRoll(){
 function resolveLanding(){
   const p=players[current],pos=p.pos;
   if(pos>=100)return finishGame(current);
-  if(ladders[pos]){const to=ladders[pos];document.getElementById('activity').textContent=`${p.name} naik tangga dari petak ${pos} ke ${to}!`;toast('🪜 Naik tangga ke petak '+to);setTimeout(()=>{p.pos=to;afterAction();},900);return;}
+  if(ladders[pos]){showModal('🪜 Tangga!',`Mendarat di petak ${pos}. Naik tangga ke petak ${ladders[pos]}!`,'good',()=>{p.pos=ladders[pos];afterAction();});return;}
   if(snakes[pos]){askQuestion('challenge');return;}
   const t=eventCells[pos];
   if(t==='question')askQuestion('question');else if(t==='bonus')bonusSpin();else if(t==='duel')duelEvent();else afterAction();
@@ -821,7 +853,7 @@ function askQuestion(type){
   lastQuestion=q;questionCounter++;
   const p=players[current],ch=type==='challenge';
   const opts=q.format==='mcq'?`<div class="answer-list">${q.options.map((op,i)=>`<button class="answer-option" onclick="selectAnswer(${i})"><b>${String.fromCharCode(65+i)}.</b> ${escapeHtml(op)}</button>`).join('')}</div>`:`<div class="field"><label>Jawabanmu</label><input id="shortResponse" placeholder="Ketik jawaban singkat..." autocomplete="off"></div>`;
-  showCustomModal(`<span class="pill">${ch?'🐍⚡ TANTANGAN · benar +15 & selamat · salah turun ular':'📝 KARTU SOAL · benar +10 · salah −5'}</span><h2 id="modalTitle">${ch?'Kepala ular! Jawab untuk selamat':'Saatnya menjawab!'}</h2><div class="muted">Pemain: ${escapeHtml(p.name)} · Level ${level}</div><div class="question-text">${escapeHtml(q.text)}</div>${opts}<div id="answerFeedback"></div><div class="modal-actions"><button class="btn btn-primary" id="submitAnswer" onclick="submitAnswer('${q.format}','${type}')">Periksa jawaban</button><button class="btn btn-ghost hidden" id="continueAnswer" onclick="continueAfter('${type}')">Lanjutkan</button></div>`);
+  showCustomModal(`<span class="pill">${ch?'🐍⚡ TANTANGAN · benar +15 & selamat · salah turun ular':'📝 KARTU SOAL · +10'}</span><h2 id="modalTitle">${ch?'Kepala ular! Jawab untuk selamat':'Saatnya menjawab!'}</h2><div class="muted">Pemain: ${escapeHtml(p.name)} · Level ${level}</div><div class="question-text">${escapeHtml(q.text)}</div>${opts}<div id="answerFeedback"></div><div class="modal-actions"><button class="btn btn-primary" id="submitAnswer" onclick="submitAnswer('${q.format}','${type}')">Periksa jawaban</button><button class="btn btn-ghost hidden" id="continueAnswer" onclick="continueAfter('${type}')">Lanjutkan</button></div>`);
   window.selectedAnswer=null;
   if(p.bot)setTimeout(()=>{if(q.format==='mcq')selectAnswer(Math.random()<.65?q.correct:(q.correct+1)%q.options.length);else document.getElementById('shortResponse').value=Math.random()<.6?q.answer:'-';submitAnswer(q.format,type);setTimeout(()=>continueAfter(type),2600);},1400);
 }
@@ -830,8 +862,8 @@ function submitAnswer(format,type){
   const q=lastQuestion,p=players[current];let correct=false;
   if(format==='mcq'){if(window.selectedAnswer==null){toast('Pilih salah satu jawaban dulu.');return;}correct=window.selectedAnswer===q.correct;}
   else{const norm=s=>String(s).trim().toLowerCase().replace(/\s+/g,' ');const v=norm(document.getElementById('shortResponse')?.value||'');if(!v){toast('Tulis jawaban dulu.');return;}correct=v===norm(q.answer);}
-  p.answered++;lastCorrect=correct;if(correct){p.correct++;p.score+=type==='challenge'?15:10;}else if(type!=='challenge')p.score-=5;
-  const info=type==='challenge'?(correct?'+15 poin. Kamu selamat dari ular!':`Pion turun lewat ular ke petak ${snakes[p.pos]}.`):(correct?'+10 poin.':'−5 poin.');
+  p.answered++;lastCorrect=correct;if(correct){p.correct++;p.score+=type==='challenge'?15:10;}
+  const info=type==='challenge'?(correct?'+15 poin. Kamu selamat dari ular!':`Pion turun lewat ular ke petak ${snakes[p.pos]}.`):(correct?'+10 poin.':'Tidak ada pengurangan poin.');
   const f=document.getElementById('answerFeedback');f.className='feedback '+(correct?'good':'bad');
   f.innerHTML=`<b>${correct?'✅ Benar!':'❌ Belum tepat.'}</b> ${info}<br><b>Pembahasan materi:</b> ${escapeHtml(q.explain||('Jawaban yang diharapkan: '+q.answer))}`;
   document.querySelectorAll('.answer-option').forEach((b,i)=>{b.disabled=true;if(i===q.correct)b.classList.add('correct');else if(i===window.selectedAnswer&&!correct)b.classList.add('wrong');});
@@ -847,64 +879,47 @@ function continueAfter(type){
 }
 function bonusSpin(){
   const p=players[current];
-  const outs=[{n:'Maju 3 langkah',x:'Pion maju 3 petak.',mv:1,a:()=>{p.pos=Math.min(100,p.pos+3);}},{n:'Maju 2 langkah',x:'Pion maju 2 petak.',mv:1,a:()=>{p.pos=Math.min(100,p.pos+2);}},{n:'Bonus +10 poin',x:'Kamu mendapat +10 poin.',a:()=>{p.score+=10;}},{n:'Bonus +5 poin',x:'Kamu mendapat +5 poin.',a:()=>{p.score+=5;}},{n:'Giliran ekstra',x:'Kamu boleh melempar dadu lagi.',a:()=>{extraTurn=true;}}];
+  const outs=[{n:'Maju 3 langkah',x:'Pion maju 3 petak.',a:()=>{p.pos=Math.min(99,p.pos+3);}},{n:'Maju 2 langkah',x:'Pion maju 2 petak.',a:()=>{p.pos=Math.min(99,p.pos+2);}},{n:'Bonus +10 poin',x:'Kamu mendapat +10 poin.',a:()=>{p.score+=10;}},{n:'Bonus +5 poin',x:'Kamu mendapat +5 poin.',a:()=>{p.score+=5;}},{n:'Giliran ekstra',x:'Kamu boleh melempar dadu lagi.',a:()=>{extraTurn=true;}}];
   const o=outs[Math.floor(Math.random()*outs.length)];
   showCustomModal(`<h2>🎡 Roda bonus</h2><div class="feedback neutral" id="spinBox" style="text-align:center;font-size:1.25rem;font-weight:800">Memutar…</div><div class="modal-actions"><button class="btn btn-primary hidden" id="spinOk">Lanjutkan</button></div>`);
   let k=0;const iv=setInterval(()=>{document.getElementById('spinBox').textContent='🎡 '+outs[k++%outs.length].n;},110);
   setTimeout(()=>{
-    clearInterval(iv);const b=document.getElementById('spinBox');b.className='feedback good';
-    b.innerHTML=`🎁 ${o.n}<div style="font-size:.95rem;font-weight:500;margin-top:6px">${o.x}${o.mv?' Jika petak tujuan berisi kartu, tetap dikerjakan.':''}</div>`;
+    clearInterval(iv);const b=document.getElementById('spinBox');b.className='feedback good';b.style.fontSize='1.25rem';
+    b.innerHTML=`🎁 ${o.n}<div style="font-size:.95rem;font-weight:500;margin-top:6px">${o.x}</div>`;
     const ok=document.getElementById('spinOk');ok.classList.remove('hidden');
-    ok.onclick=()=>{closeModal();o.a();document.getElementById('activity').textContent=`${p.name}: ${o.n}.`;if(o.mv){renderBoard();renderStats();setTimeout(resolveLanding,500);}else afterAction();};
+    ok.onclick=()=>{closeModal();o.a();document.getElementById('activity').textContent=`${p.name}: ${o.n}.`;afterAction();};
     if(p.bot)setTimeout(()=>ok.click(),1600);
   },1700);
 }
 function duelEvent(){
-  const q=getQuestion('question');if(!q){afterAction();return;}
-  DU={q,locked:new Set(),buz:-1,phase:'buzz',t:12,iv:null,to:[],done:false};
-  const btns=players.map((p,i)=>`<button class="btn buzz" id="bz${i}" style="background:${PCOL[i]};color:#fff" onclick="duelBuzz(${i})" ${p.bot?'disabled':''}>${escapeHtml(p.name)}${p.bot?'':`<br><small>tombol ${i+1}</small>`}</button>`).join('');
-  showCustomModal(`<span class="pill">⚔️ DUEL REBUTAN · tercepat menjawab benar +10</span><h2>Rebut soal ini!</h2><div class="muted" id="duelTimer"></div><div class="question-text">${escapeHtml(q.text)}</div><div id="buzzArea"><div class="muted" id="duelNote" style="margin-bottom:8px">Tekan namamu (atau tombol angka) untuk merebut soal. Pilihan jawaban muncul setelah kamu menekan.</div><div class="buzz-grid">${btns}</div></div><div id="duelOpts"></div><div id="answerFeedback"></div><div class="modal-actions" id="duelActions"></div>`);
-  document.addEventListener('keydown',duelKey);
-  duelTimerStart();
-  players.forEach((p,i)=>{if(p.bot&&Math.random()<.7)DU.to.push(setTimeout(()=>duelBuzz(i),2500+Math.random()*4500));});
+  const ai=current;let bi;
+  if(mode==='solo')bi=1-ai;else{const o=players.map((_,i)=>i).filter(i=>i!==ai);bi=o[Math.floor(Math.random()*o.length)];}
+  const D=[players[ai],players[bi]],q=getQuestion('question');
+  if(!q){afterAction();return;}
+  DU={q,D,done:false,locked:[false,false],t:10,iv:null};
+  const col=i=>`<div><b>${escapeHtml(D[i].name)}</b><div class="answer-list">${q.options.map((op,j)=>`<button class="answer-option" data-d="${i}" onclick="duelTap(${i},${j})" ${D[i].bot?'disabled':''}>${String.fromCharCode(65+j)}. ${escapeHtml(op)}</button>`).join('')}</div></div>`;
+  showCustomModal(`<span class="pill">⚔️ DUEL KILAT · tercepat menjawab benar +10</span><h2>${escapeHtml(D[0].name)} vs ${escapeHtml(D[1].name)}</h2><div class="muted" id="duelTimer">⏱ 10 detik</div><div class="question-text">${escapeHtml(q.text)}</div><div class="duel-grid">${col(0)}${col(1)}</div><div id="answerFeedback"></div><div class="modal-actions" id="duelActions"></div>`);
+  DU.iv=setInterval(()=>{DU.t--;const e=document.getElementById('duelTimer');if(e)e.textContent='⏱ '+DU.t+' detik';if(DU.t<=0)endDuel(-1);},1000);
+  D.forEach((p,i)=>{if(p.bot)setTimeout(()=>duelTap(i,Math.random()<.6?q.correct:(q.correct+1)%q.options.length),1500+Math.random()*5500);});
 }
-function duelKey(e){const i=+e.key-1;if(i>=0&&i<players.length&&!players[i].bot)duelBuzz(i);}
-function duelTimerStart(){
-  clearInterval(DU.iv);DU.t=DU.phase==='buzz'?12:8;
-  const show=()=>{const e=document.getElementById('duelTimer');if(e)e.textContent='⏱ '+DU.t+' detik'+(DU.phase==='answer'?' · '+players[DU.buz].name+' menjawab':'');};show();
-  DU.iv=setInterval(()=>{DU.t--;show();if(DU.t<=0){if(DU.phase==='buzz')endDuel(-1);else duelWrong();}},1000);
-}
-function duelBuzz(i){
-  if(!DU||DU.done||DU.phase!=='buzz'||DU.locked.has(i))return;
-  DU.phase='answer';DU.buz=i;document.getElementById('buzzArea').classList.add('hidden');
-  document.getElementById('duelOpts').innerHTML=`<div class="muted"><b>${escapeHtml(players[i].name)}</b> merebut soal! Pilih jawaban:</div><div class="answer-list">${DU.q.options.map((op,j)=>`<button class="answer-option" onclick="duelAnswer(${j})" ${players[i].bot?'disabled':''}>${String.fromCharCode(65+j)}. ${escapeHtml(op)}</button>`).join('')}</div>`;
-  duelTimerStart();
-  if(players[i].bot)DU.to.push(setTimeout(()=>duelAnswer(Math.random()<.6?DU.q.correct:(DU.q.correct+1)%DU.q.options.length),1200));
-}
-function duelAnswer(j){if(!DU||DU.done||DU.phase!=='answer')return;if(j===DU.q.correct)endDuel(DU.buz);else duelWrong();}
-function duelWrong(){
-  const w=players[DU.buz].name;DU.locked.add(DU.buz);
-  if(players.every((p,i)=>DU.locked.has(i))){endDuel(-1);return;}
-  DU.phase='buzz';DU.buz=-1;document.getElementById('duelOpts').innerHTML='';document.getElementById('buzzArea').classList.remove('hidden');
-  document.getElementById('duelNote').textContent=w+' belum tepat. Pemain lain boleh merebut soal!';
-  DU.locked.forEach(i=>{const b=document.getElementById('bz'+i);if(b)b.disabled=true;});
-  duelTimerStart();
-  players.forEach((p,i)=>{if(p.bot&&!DU.locked.has(i)&&Math.random()<.7)DU.to.push(setTimeout(()=>duelBuzz(i),1500+Math.random()*3500));});
+function duelTap(i,j){
+  if(!DU||DU.done||DU.locked[i])return;
+  if(j===DU.q.correct){endDuel(i);return;}
+  DU.locked[i]=true;document.querySelectorAll(`[data-d="${i}"]`).forEach(b=>b.disabled=true);
+  if(DU.locked[0]&&DU.locked[1])endDuel(-1);
 }
 function endDuel(w){
-  if(!DU||DU.done)return;DU.done=true;clearInterval(DU.iv);DU.to.forEach(clearTimeout);document.removeEventListener('keydown',duelKey);
-  const q=DU.q;DU.locked.forEach(i=>players[i].answered++);
-  if(w>=0){const p=players[w];p.answered++;p.correct++;p.score+=10;}
-  document.getElementById('buzzArea').classList.add('hidden');document.getElementById('duelOpts').innerHTML='';document.getElementById('duelTimer').textContent='';
-  const f=document.getElementById('answerFeedback');f.className='feedback '+(w>=0?'good':'neutral');
-  f.innerHTML=`<b>${w>=0?escapeHtml(players[w].name)+' paling cepat menjawab benar! +10 poin':'Tidak ada yang menjawab benar tepat waktu. Tidak ada poin.'}</b><br>Jawaban: ${escapeHtml(q.answer)}.<br><b>Pembahasan materi:</b> ${escapeHtml(q.explain||'')}`;
-  document.getElementById('activity').textContent=w>=0?`${players[w].name} menang duel rebutan.`:'Duel berakhir tanpa pemenang.';
+  if(!DU||DU.done)return;DU.done=true;clearInterval(DU.iv);
+  const {q,D}=DU,win=w>=0?D[w]:null;
+  D.forEach(p=>p.answered++);if(win){win.score+=10;win.correct++;}
+  document.querySelectorAll('.duel-grid .answer-option').forEach(b=>{b.disabled=true;const idx=[...b.parentNode.children].indexOf(b);if(idx===q.correct)b.classList.add('correct');});
+  const f=document.getElementById('answerFeedback');f.className='feedback '+(win?'good':'neutral');
+  f.innerHTML=`<b>${win?escapeHtml(win.name)+' paling cepat menjawab benar! +10 poin':'Tidak ada yang menjawab benar tepat waktu. Tidak ada poin.'}</b><br>Jawaban: ${escapeHtml(q.answer)}.<br><b>Pembahasan materi:</b> ${escapeHtml(q.explain||'')}`;
+  document.getElementById('activity').textContent=win?`${win.name} menang duel.`:'Duel berakhir tanpa pemenang.';
   document.getElementById('duelActions').innerHTML='<button class="btn btn-primary" id="duelOk">Lanjutkan</button>';
   const ok=document.getElementById('duelOk');ok.onclick=()=>{closeModal();renderStats();afterAction();};
-  if(players[current].bot)setTimeout(()=>ok.click(),3200);
+  if(players[current].bot)setTimeout(()=>ok.click(),2600);
 }
-
-
 function showModal(title,text,kind,onContinue){showCustomModal(`<h2 id="modalTitle">${title}</h2><div class="feedback ${kind||'neutral'}">${text}</div><div class="modal-actions"><button class="btn btn-primary" id="modalContinue">Lanjutkan</button></div>`);const b=document.getElementById('modalContinue');b.onclick=()=>{closeModal();if(onContinue)onContinue();};if(players[current]&&players[current].bot&&!gameOver)setTimeout(()=>b.click(),1800);}
 function showCustomModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modalBackdrop').classList.add('show');}
 function closeModal(){document.getElementById('modalBackdrop').classList.remove('show');}
@@ -923,12 +938,12 @@ function finishGame(winnerIndex){
 function confirmExit(){showModal('Keluar dari permainan?','Progres sesi ini akan direset jika kamu memulai permainan baru.','neutral',()=>showScreen('home'));}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function toggleQuestionFormat(){const short=document.getElementById('qFormat').value==='short';document.getElementById('mcqFields').classList.toggle('hidden',short);document.getElementById('shortFields').classList.toggle('hidden',!short);}
-function resetQuestionForm(){editingId=null;['qText','optA','optB','optC','shortAnswer','qExplain'].forEach(id=>document.getElementById(id).value='');document.getElementById('qLevel').value='mudah';document.getElementById('qType').value='question';document.getElementById('qFormat').value='mcq';document.getElementById('qCorrect').value='0';toggleQuestionFormat();document.getElementById('formTitle').textContent='Tambah soal';}
+function resetQuestionForm(){editingId=null;['qText','optA','optB','optC','optD','shortAnswer','qExplain'].forEach(id=>document.getElementById(id).value='');document.getElementById('qLevel').value='mudah';document.getElementById('qType').value='question';document.getElementById('qFormat').value='mcq';document.getElementById('qCorrect').value='0';toggleQuestionFormat();document.getElementById('formTitle').textContent='Tambah soal';}
 function saveQuestion(){
   const text=document.getElementById('qText').value.trim(),format=document.getElementById('qFormat').value;
   if(!text){toast('Pertanyaan belum diisi.');return;}
   let options=[],correct=0,answer='';
-  if(format==='mcq'){options=['optA','optB','optC'].map(id=>document.getElementById(id).value.trim());if(options.some(x=>!x)){toast('Isi semua pilihan A, B, dan C.');return;}correct=Number(document.getElementById('qCorrect').value);answer=options[correct];}
+  if(format==='mcq'){options=['optA','optB','optC','optD'].map(id=>document.getElementById(id).value.trim());if(options.slice(0,3).some(x=>!x)){toast('Isi minimal pilihan A, B, dan C.');return;}if(!options[3])options.pop();correct=Number(document.getElementById('qCorrect').value);if(correct>=options.length){toast('Jawaban benar menunjuk pilihan yang kosong.');return;}answer=options[correct];}
   else{answer=document.getElementById('shortAnswer').value.trim();if(!answer){toast('Isi jawaban singkat yang benar.');return;}}
   const item={id:editingId||Date.now(),level:document.getElementById('qLevel').value,type:document.getElementById('qType').value,format,text,options,correct,answer,explain:document.getElementById('qExplain').value.trim()||'Pelajari kembali konsep yang berkaitan dengan soal ini.'};
   if(editingId){questions=questions.map(q=>q.id===editingId?item:q);}else questions.push(item);
@@ -938,7 +953,7 @@ function editQuestion(id){
   const q=questions.find(x=>x.id===id);if(!q)return;editingId=id;
   document.getElementById('formTitle').textContent='Edit soal';
   document.getElementById('qText').value=q.text;document.getElementById('qLevel').value=q.level;document.getElementById('qType').value=q.type;document.getElementById('qFormat').value=q.format;
-  document.getElementById('optA').value=q.options?.[0]||'';document.getElementById('optB').value=q.options?.[1]||'';document.getElementById('optC').value=q.options?.[2]||'';document.getElementById('qCorrect').value=String(q.correct||0);document.getElementById('shortAnswer').value=q.format==='short'?q.answer:'';document.getElementById('qExplain').value=q.explain||'';toggleQuestionFormat();window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('optA').value=q.options?.[0]||'';document.getElementById('optB').value=q.options?.[1]||'';document.getElementById('optC').value=q.options?.[2]||'';document.getElementById('optD').value=q.options?.[3]||'';document.getElementById('qCorrect').value=String(q.correct||0);document.getElementById('shortAnswer').value=q.format==='short'?q.answer:'';document.getElementById('qExplain').value=q.explain||'';toggleQuestionFormat();window.scrollTo({top:0,behavior:'smooth'});
 }
 function deleteQuestion(id){if(!confirm('Hapus soal ini?'))return;questions=questions.filter(q=>q.id!==id);renderAdminQuestions();toast('Soal dihapus.');}
 function renderAdminQuestions(){
